@@ -1,0 +1,80 @@
+# Agrupamento por E.C number
+function groupSelectedECs() {
+  // ====== CONFIG ======
+  const SOURCE_SHEET = "Filtro1";  //
+  // =====================
+
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const src = ss.getSheetByName(SOURCE_SHEET);
+  if (!src) {
+    throw new Error("Sheet '" + SOURCE_SHEET + "' not found.");
+  }
+
+
+  const data = src.getDataRange().getValues();
+  if (data.length < 2) {
+    throw new Error("Source sheet is empty.");
+  }
+
+
+  const header = data[0];
+  const rows   = data.slice(1);
+
+
+  const idxEC = header.indexOf("EC");
+  if (idxEC === -1) {
+    throw new Error("Column 'EC' not found in header.");
+  }
+
+
+  
+  const ECs = {
+    "1.1.1.37": "EC_1_1_1_37_MDH",
+    "2.6.1.9":  "EC_2_6_1_9_HisP_AT",
+    "4.2.3.1":  "EC_4_2_3_1_ThrSynth",
+    "4.3.1.3":  "EC_4_3_1_3_His_AML",
+    "4.3.1.19": "EC_4_3_1_19_Thr_AML"
+  };
+
+
+  
+  const groups = {};
+  Object.keys(ECs).forEach(ec => groups[ec] = []);
+
+
+  rows.forEach(row => {
+    const ecCell = (row[idxEC] || "").toString().trim();
+    if (!ecCell) return;
+
+
+    
+    ecCell.split(/[;,]/).forEach(part => {
+      const ec = part.trim();
+      if (ECs[ec]) {
+        groups[ec].push(row);
+      }
+    });
+  });
+
+
+  
+  Object.keys(groups).forEach(ec => {
+    const sheetName = ECs[ec].slice(0, 99);
+    let sh = ss.getSheetByName(sheetName);
+    if (!sh) {
+      sh = ss.insertSheet(sheetName);
+    } else {
+      sh.clearContents();
+    }
+
+
+    const out = [header].concat(groups[ec]);
+    if (out.length > 1) {
+      sh.getRange(1, 1, out.length, out[0].length).setValues(out);
+    }
+  });
+
+
+  SpreadsheetApp.getUi().alert("Feito");
+}
