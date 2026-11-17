@@ -13,12 +13,6 @@ Universidade Federal do Ceará (UFC) · Embrapa Agroindústria Tropical · Unive
 
 Pilocarpine is an imidazole alkaloid whose biosynthetic pathway in jaborandi (*Pilocarpus microphyllus*) is still unresolved. The working hypothesis is that the imidazole ring derives from **histidine** and the aliphatic moiety from **threonine**, with ammonia-lyases as candidate entry enzymes.
 
-This repository contains the workflow used to:
-
-1. identify candidate transcripts for **histidine biosynthesis (HISN1–8)**, **histidine ammonia-lyase (HAL)**, **phenylalanine ammonia-lyase (PAL)** and **threonine dehydratase (TDH)** in root, stem, leaf and rachis transcriptomes;
-2. compare annotations from **eggNOG-mapper** and **Mercator4**;
-3. assign the **taxonomic origin** (plant vs. non-plant) of each candidate;
-4. place candidates in **maximum-likelihood phylogenies** (methods described below; trees not included).
 
 ## Pipeline
 
