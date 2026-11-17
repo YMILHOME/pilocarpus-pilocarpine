@@ -45,8 +45,6 @@ Most steps were run on the European Galaxy server, **[usegalaxy.eu](https://useg
 | Trimming | trimAl | trimAl web server (`TODO` URL) | 1.5.1 | `TODO` |
 | Phylogeny | IQ-TREE | W-IQ-TREE web server | 2.4 | model selection by BIC, 1,000 UFBoot |
 
-The Galaxy workflow (tools and parameters, without data) is available at: `TODO: link to the published Galaxy workflow`.
-
 ## Target enzymes
 
 | Enzyme | EC | KEGG KO | Mercator4 bin (regex) |
