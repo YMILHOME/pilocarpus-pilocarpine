@@ -1,0 +1,109 @@
+# Script drafted with AI assistance (Claude, Anthropic); reviewed and validated by the authors.
+
+"""
+Versões das figuras para a coluna estreita do pôster (template BSB 2026).
+Lê os CSVs gerados por analise_foco_HAL_TDH_PAL_histidina.py (pasta resultados_foco/).
+Ajuste LARGURA_CM / ALTURA_CM se o espaço do seu template for diferente.
+"""
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+PASTA = Path("resultados_foco")
+NAVY, ORANGE, GRAY, GREEN, LIGHT = "#13284B", "#F07D26", "#6B7A6E", "#3A8D3F", "#B9C2CC"
+CM = 1 / 2.54
+plt.rcParams.update({"font.size": 11, "font.family": "DejaVu Sans"})
+
+# tamanho final no pôster (largura x altura, em cm)
+HEATMAP_CM = (16, 15)   # espaço "Figure 1" (quase quadrado)
+ORIGEM_CM = (16, 12)    # espaço "Figure 2"/"Figure 3"
+
+ROT_CURTO = {
+    "HISN1 · ATP-PRT": "HISN1", "HISN2 · PRA-PH/CH": "HISN2", "HISN3 · ProFAR isomerase": "HISN3",
+    "HISN4 · IGP synthase": "HISN4", "HISN5 · IGP dehydratase": "HISN5",
+    "HISN6 · HolP aminotransf.": "HISN6", "HISN7 · HolP phosphatase": "HISN7",
+    "HISN8 · histidinol DH": "HISN8", "HAL": "HAL", "PAL": "PAL", "TDH (TAL)": "TDH",
+}
+TECIDOS = ["Root", "Stem", "Leaf", "Rachis"]
+
+
+def salva(fig, nome):
+    for ext in ("png", "svg", "pdf"):
+        fig.savefig(PASTA / f"{nome}.{ext}", dpi=600, bbox_inches="tight", pad_inches=0.03)
+    plt.close(fig)
+
+
+def heatmap():
+    t = pd.read_csv(PASTA / "tabela_foco.csv")
+    enz = list(dict.fromkeys(t["enzima"]))
+    cols = [("Root", False), ("Root", True), ("Stem", False), ("Leaf", False), ("Rachis", False)]
+    rot_cols = ["Root\n(all)", "Root\n(plant)", "Stem", "Leaf", "Rachis"]
+    U = np.zeros((len(enz), len(cols)))
+    txt = [["" for _ in cols] for _ in enz]
+    for r, e in enumerate(enz):
+        for c, (tec, p) in enumerate(cols):
+            row = t[(t.enzima == e) & (t.tecido == tec)].iloc[0]
+            eg, me = (row.planta_eggNOG, row.planta_Mercator) if p else (row.eggNOG, row.Mercator)
+            U[r, c] = row.planta_uniao if p else row.uniao
+            txt[r][c] = f"{eg}|–" if e == "HAL" else f"{eg}|{me}"
+    vmax = U.max()
+    fig, ax = plt.subplots(figsize=(HEATMAP_CM[0] * CM, HEATMAP_CM[1] * CM))
+    ax.imshow(np.log1p(U), cmap="Blues", vmin=0, vmax=np.log1p(vmax), aspect="auto")
+    for r in range(len(enz)):
+        for c in range(len(cols)):
+            ax.text(c, r, txt[r][c], ha="center", va="center", fontsize=10.5, fontweight="bold",
+                    color="white" if np.log1p(U[r, c]) > np.log1p(vmax) * 0.6 else NAVY)
+    ax.set_xticks(range(len(cols)), rot_cols, fontsize=10.5)
+    ax.xaxis.tick_top()
+    ax.set_yticks(range(len(enz)), [ROT_CURTO.get(e, e) for e in enz], fontsize=11, fontweight="bold")
+    n_his = sum(e.startswith("HISN") for e in enz)
+    ax.axhline(n_his - 0.5, color=ORANGE, lw=2.5)
+    ax.axvline(1.5, color="white", lw=4)
+    ax.tick_params(length=0)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    salva(fig, "poster_fig_heatmap")
+
+
+def origem():
+    o = pd.read_csv(PASTA / "origem_foco.csv", index_col=[0, 1])
+    o = o[o.sum(axis=1) > 0]
+    ordem = ["Plant", "Eukaryota (unresolved)", "Other eukaryotes", "Bacteria/Archaea"]
+    nomes = {"Plant": "Plant", "Eukaryota (unresolved)": "Eukaryota (unres.)",
+             "Other eukaryotes": "Other eukaryotes", "Bacteria/Archaea": "Bacteria"}
+    cores = [GREEN, LIGHT, GRAY, ORANGE]
+    o = o.reindex(columns=ordem, fill_value=0)
+    pct = o.div(o.sum(axis=1), axis=0) * 100
+    curto = {"Histidine pathway (HISN1–8)": "HISN1–8"}
+    loc = {"Root": "Root", "Aerial (stem+leaf+rachis)": "Aerial"}
+    rot = [f"{curto.get(b, b.replace(' (TAL)', ''))} · {loc[l]}\n(n = {int(o.loc[(b, l)].sum())})"
+           for b, l in o.index]
+    fig, ax = plt.subplots(figsize=(ORIGEM_CM[0] * CM, ORIGEM_CM[1] * CM))
+    esq = np.zeros(len(o))
+    for col, cor in zip(ordem, cores):
+        v = pct[col].values
+        ax.barh(rot, v, left=esq, color=cor, label=nomes[col], height=0.72)
+        for i, x in enumerate(v):
+            if x >= 12:
+                ax.text(esq[i] + x / 2, i, f"{x:.0f}%", ha="center", va="center", fontsize=10,
+                        fontweight="bold", color="white")
+        esq += v
+    ax.invert_yaxis()
+    ax.set_xlim(0, 100)
+    ax.set_xticks([0, 25, 50, 75, 100], ["0", "25", "50", "75", "100%"])
+    ax.tick_params(axis="y", length=0, labelsize=10.5)
+    ax.legend(frameon=False, ncol=2, loc="lower center", bbox_to_anchor=(0.4, 1.0), fontsize=9.5,
+              handlelength=1.2, columnspacing=1.0)
+    for s in ("top", "right", "left"):
+        ax.spines[s].set_visible(False)
+    salva(fig, "poster_fig_origem")
+
+
+if __name__ == "__main__":
+    heatmap()
+    origem()
+    print("Figuras salvas em", PASTA.resolve())
