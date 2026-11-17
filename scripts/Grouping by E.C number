@@ -14,7 +14,7 @@ function groupSelectedECs() {
 
   const data = src.getDataRange().getValues();
   if (data.length < 2) {
-    throw new Error("Source sheet is empty.");
+    throw new Error("Planilha vazia.");
   }
 
 
@@ -24,7 +24,7 @@ function groupSelectedECs() {
 
   const idxEC = header.indexOf("EC");
   if (idxEC === -1) {
-    throw new Error("Column 'EC' not found in header.");
+    throw new Error("Coluna 'EC' não foi encontrada");
   }
 
 
