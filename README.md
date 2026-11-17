@@ -2,7 +2,7 @@
 
 Code and methods for the poster presented at the **Brazilian Symposium on Bioinformatics (BSB 2026)**, Ribeirão Preto, SP.
 
-**Yasmim Aquino Milhome**, Bruno Costa Evangelista Souza, Alison Pelri Albuquerque Menezes, Acácio Raphael Aguiar Moraes, Fernando Araripe Gonçalves Torres3, Natalia Florencio Martins.
+**Yasmim Aquino Milhome**, Bruno Costa Evangelista Souza, Alison Pelri Albuquerque Menezes, Acácio Raphael Aguiar Moraes, Fernando Araripe Gonçalves Torres, Natalia Florencio Martins.
 Universidade Federal do Ceará (UFC) · Embrapa Agroindústria Tropical · Universidade de Brasília (UnB)
 
 > **Data availability.** *P. microphyllus* assemblies, predicted proteins, annotation tables and alignments are part of unpublished work and are **not** included. They are available from the authors upon reasonable request. Raw reads: NCBI BioProject **PRJNA1220646**.
